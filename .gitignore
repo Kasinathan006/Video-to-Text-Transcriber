@@ -1,0 +1,28 @@
+# Secrets & config
+.env
+
+# Runtime data
+storage/
+logs/
+voxdoc_workspace/
+studio_workspace/
+temp_uploads/
+
+# Python
+__pycache__/
+*.pyc
+
+# Media & generated artifacts (project workspace)
+*.mp4
+*.mkv
+*.mov
+*.wav
+*.m4a
+*.mp3
+audio_files/
+audio_chunks*/
+json_outputs_*/
+txt_outputs_*/
+transcription_outputs/
+gdrive_videos/
+*.docx

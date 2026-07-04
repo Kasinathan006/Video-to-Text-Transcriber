@@ -1,0 +1,12 @@
+[theme]
+base = "dark"
+primaryColor = "#6366F1"
+backgroundColor = "#0B0F19"
+secondaryBackgroundColor = "#141A2E"
+textColor = "#E2E8F0"
+
+[server]
+maxUploadSize = 10240   # allow direct uploads up to 10GB (Build Guide §1)
+
+[browser]
+gatherUsageStats = false

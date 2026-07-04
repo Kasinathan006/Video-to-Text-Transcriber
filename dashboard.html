@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VoxDoc AI Studio</title>
+<style>
+  :root {
+    --bg1: #0B0F19; --bg2: #1e1b4b;
+    --glass: rgba(255,255,255,0.04); --border: rgba(255,255,255,0.09);
+    --indigo: #6366F1; --violet: #8B5CF6;
+    --text: #E2E8F0; --muted: #94A3B8;
+    --green: #10B981; --red: #f56565; --amber: #ecc94b;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
+    background: radial-gradient(1200px 800px at 15% 0%, var(--bg2), var(--bg1) 60%);
+    min-height: 100vh; color: var(--text); padding: 1.4rem 1rem 3rem;
+  }
+  .container { max-width: 1120px; margin: 0 auto; }
+  .topbar { display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: .8rem; margin-bottom: 1.6rem; }
+  .logo { font-weight: 800; font-size: 1.35rem;
+    background: linear-gradient(90deg, #818cf8, #c084fc);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    text-decoration: none; }
+  .userbox { display: flex; align-items: center; gap: .7rem; font-size: .85rem; color: var(--muted); }
+  .tierbadge { font-size: .7rem; font-weight: 700; padding: .22rem .7rem; border-radius: 99px;
+    background: rgba(139,92,246,.18); color: #c4b5fd; text-transform: uppercase; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.3rem; }
+  @media (max-width: 880px) { .grid { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--glass); border: 1px solid var(--border); border-radius: 16px;
+    padding: 1.4rem; backdrop-filter: blur(14px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35); margin-bottom: 1.3rem;
+  }
+  .card h2 { font-size: 1.02rem; margin-bottom: 1rem; color: #c3cbf5; }
+  label { display: block; font-size: .78rem; color: var(--muted); margin: .85rem 0 .28rem; }
+  input, select {
+    width: 100%; padding: .55rem .7rem; border-radius: 8px;
+    border: 1px solid var(--border); background: rgba(0,0,0,0.35);
+    color: var(--text); font-size: .9rem; outline: none;
+  }
+  input:focus, select:focus { border-color: var(--indigo); }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+  button {
+    padding: .6rem 1.1rem; border: none; border-radius: 9px; cursor: pointer;
+    font-size: .92rem; font-weight: 700; color: white;
+    background: linear-gradient(135deg, var(--indigo), var(--violet));
+    transition: transform .12s, box-shadow .12s;
+  }
+  button:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(99,102,241,.4); }
+  button:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+  button.ghost { background: transparent; border: 1px solid var(--border); font-weight: 600; }
+  button.wide { width: 100%; margin-top: 1rem; padding: .75rem; font-size: .98rem; }
+  #dropzone {
+    border: 2px dashed rgba(139,92,246,.4); border-radius: 12px;
+    padding: 1.9rem 1rem; text-align: center; cursor: pointer;
+    transition: all .2s; color: var(--muted);
+  }
+  #dropzone.dragover, #dropzone:hover { border-color: var(--violet);
+    background: rgba(139,92,246,0.1); color: var(--text); }
+  #dropzone .icon { font-size: 2rem; display: block; margin-bottom: .4rem; }
+  .filename { margin-top: .7rem; font-size: .88rem; color: var(--green); word-break: break-all; }
+  .meter { height: 8px; border-radius: 99px; background: rgba(255,255,255,.08); overflow: hidden; margin: .4rem 0; }
+  .meter > div { height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--green), #34d399); transition: width .4s; }
+  .meter.hot > div { background: linear-gradient(90deg, #f59e0b, var(--red)); }
+  .job { border: 1px solid var(--border); border-radius: 12px; padding: 1rem;
+         margin-bottom: .85rem; background: rgba(0,0,0,0.22); }
+  .job-head { display: flex; justify-content: space-between; gap: .6rem; align-items: baseline; }
+  .job-name { font-weight: 600; font-size: .9rem; word-break: break-all; }
+  .badge { font-size: .68rem; padding: .18rem .55rem; border-radius: 99px; white-space: nowrap; font-weight: 700; }
+  .badge.queued { background: rgba(236,201,75,.15); color: var(--amber); }
+  .badge.processing { background: rgba(99,102,241,.18); color: #a3b3f5; }
+  .badge.completed { background: rgba(16,185,129,.15); color: var(--green); }
+  .badge.failed { background: rgba(245,101,101,.15); color: var(--red); }
+  .bar { height: 6px; border-radius: 99px; background: rgba(255,255,255,0.08);
+         margin: .65rem 0 .4rem; overflow: hidden; }
+  .bar > div { height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--indigo), var(--violet)); transition: width .5s; }
+  .detail { font-size: .77rem; color: var(--muted); }
+  .job-actions { margin-top: .65rem; display: flex; gap: .55rem; flex-wrap: wrap; }
+  .job-actions button { font-size: .78rem; padding: .4rem .85rem; }
+  .empty { text-align: center; color: var(--muted); padding: 1.4rem 0; font-size: .88rem; }
+  .msg { font-size: .84rem; margin-top: .7rem; display: none; padding: .55rem .8rem; border-radius: 8px; }
+  .msg.err { color: #feb2b2; background: rgba(245,101,101,.12); }
+  .msg.ok { color: #9ae6b4; background: rgba(16,185,129,.12); }
+  .authwrap { max-width: 420px; margin: 6vh auto; }
+  .authwrap .logo { font-size: 1.8rem; display: block; text-align: center; margin-bottom: 1.2rem; }
+  .tabs { display: flex; gap: .4rem; margin-bottom: 1rem; }
+  .tabs button { flex: 1; background: transparent; border: 1px solid var(--border); font-weight: 600; }
+  .tabs button.active { background: linear-gradient(135deg, var(--indigo), var(--violet)); border: none; }
+  table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+  th, td { text-align: left; padding: .45rem .5rem; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 600; }
+  code.key { background: rgba(0,0,0,.4); padding: .15rem .45rem; border-radius: 6px;
+             font-size: .78rem; color: #a5f3c4; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ======================= AUTH VIEW ======================= -->
+  <div id="authView" class="authwrap hidden">
+    <a class="logo" href="/">🎙️ VoxDoc AI</a>
+    <div class="card">
+      <div class="tabs">
+        <button id="tabLogin" class="active" onclick="setAuthTab('login')">Log In</button>
+        <button id="tabSignup" onclick="setAuthTab('signup')">Create Account</button>
+      </div>
+      <div id="signupName" class="hidden">
+        <label>Full Name</label>
+        <input id="authName" placeholder="Your name">
+      </div>
+      <label>Email</label>
+      <input id="authEmail" type="email" placeholder="you@example.com">
+      <label>Password <span style="opacity:.6">(8+ characters)</span></label>
+      <input id="authPass" type="password" placeholder="••••••••">
+      <button class="wide" id="authBtn" onclick="submitAuth()">Log In</button>
+      <div class="msg err" id="authMsg"></div>
+      <p style="font-size:.78rem; color:var(--muted); margin-top:1rem; text-align:center">
+        New accounts start on the free Starter plan — 60 transcription minutes every month.
+      </p>
+    </div>
+  </div>
+
+  <!-- ======================= APP VIEW ======================= -->
+  <div id="appView" class="hidden">
+    <div class="topbar">
+      <a class="logo" href="/">🎙️ VoxDoc AI Studio</a>
+      <div class="userbox">
+        <span id="userEmail"></span>
+        <span class="tierbadge" id="userTier"></span>
+        <button class="ghost" onclick="logout()">Log out</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div>
+        <!-- New job -->
+        <div class="card">
+          <h2>1️⃣ New Transcription Job</h2>
+          <div id="dropzone">
+            <span class="icon">📁</span>
+            <strong>Drop your media file here</strong><br>
+            <span style="font-size:.78rem">or click to browse — MP4, MKV, MOV, WAV, MP3, M4A…</span>
+            <div class="filename" id="fileLabel"></div>
+          </div>
+          <input type="file" id="fileInput" class="hidden"
+                 accept=".mp4,.mkv,.mov,.avi,.flv,.wmv,.webm,.m4v,.wav,.mp3,.m4a,.flac,.ogg,.aac">
+
+          <label>Transcription Engine</label>
+          <select id="engine" onchange="engineChanged()">
+            <option value="sarvam">🌐 Sarvam AI — Cloud SOTA (Indian languages)</option>
+            <option value="whisper">🔒 Whisper — Local GPU/CPU (offline & private)</option>
+          </select>
+
+          <div id="sarvamOpts">
+            <div class="row2">
+              <div>
+                <label>Language</label>
+                <select id="language">
+                  <option value="en-IN">English / Tanglish</option>
+                  <option value="hi-IN">Hindi</option>
+                  <option value="ta-IN">Tamil</option>
+                  <option value="te-IN">Telugu</option>
+                  <option value="ml-IN">Malayalam</option>
+                  <option value="kn-IN">Kannada</option>
+                  <option value="bn-IN">Bengali</option>
+                  <option value="mr-IN">Marathi</option>
+                </select>
+              </div>
+              <div>
+                <label>Sarvam Model</label>
+                <select id="sarvamModel">
+                  <option value="saaras:v3">saaras:v3 — English output</option>
+                  <option value="saarika:v2">saarika:v2 — native script</option>
+                </select>
+              </div>
+            </div>
+            <label>Sarvam API Key <span style="opacity:.6">(optional — server key used if blank)</span></label>
+            <input type="password" id="apiKey" placeholder="sk_...">
+          </div>
+
+          <div id="whisperOpts" class="hidden">
+            <label>Whisper Model Size</label>
+            <select id="whisperModel">
+              <option value="large-v3">large-v3 (best accuracy)</option>
+              <option value="medium">medium</option>
+              <option value="small">small</option>
+              <option value="base">base (fast)</option>
+              <option value="tiny">tiny (fastest)</option>
+            </select>
+          </div>
+
+          <div class="row2">
+            <div>
+              <label>Word Font</label>
+              <select id="fontName">
+                <option value="Calibri">Calibri</option>
+                <option value="Arial">Arial</option>
+                <option value="Nirmala UI">Nirmala UI (Tamil/Hindi)</option>
+              </select>
+            </div>
+            <div>
+              <label>Sentences / Paragraph</label>
+              <input type="number" id="paraSentences" value="6" min="1" max="12">
+            </div>
+          </div>
+
+          <button class="wide" id="submitBtn" onclick="submitJob()" disabled>🚀 Generate Word Document</button>
+          <div class="msg err" id="jobMsg"></div>
+        </div>
+
+        <!-- Account -->
+        <div class="card">
+          <h2>💳 Account &amp; Plan</h2>
+          <div style="font-size:.86rem" id="quotaText"></div>
+          <div class="meter" id="quotaMeter"><div style="width:0%"></div></div>
+          <div style="font-size:.76rem; color:var(--muted)" id="quotaSub"></div>
+          <label>Redeem a License Key to upgrade</label>
+          <div style="display:flex; gap:.6rem">
+            <input id="licenseKey" placeholder="VOX-PRO-XXXX-XXXX-XXXX-XXXX">
+            <button onclick="redeemKey()">Redeem</button>
+          </div>
+          <div class="msg" id="licenseMsg"></div>
+        </div>
+      </div>
+
+      <div>
+        <!-- Jobs -->
+        <div class="card">
+          <h2>2️⃣ Job Queue &amp; Downloads</h2>
+          <div id="jobList"><div class="empty">No jobs yet — upload a recording to get started.</div></div>
+        </div>
+
+        <!-- Admin -->
+        <div class="card hidden" id="adminCard">
+          <h2>🛡️ Admin Panel</h2>
+          <label>Mint License Keys</label>
+          <div class="row2">
+            <select id="keyTier">
+              <option value="pro">Creator Pro</option>
+              <option value="agency">Agency / Team</option>
+            </select>
+            <div style="display:flex; gap:.5rem">
+              <input type="number" id="keyDays" value="30" min="1" title="Days valid">
+              <input type="number" id="keyCount" value="1" min="1" max="100" title="How many">
+              <button onclick="genKeys()">Mint</button>
+            </div>
+          </div>
+          <div id="newKeys" style="margin:.7rem 0"></div>
+          <label>Users</label>
+          <div style="overflow-x:auto"><table id="usersTable">
+            <thead><tr><th>Email</th><th>Plan</th><th>Used</th><th>Set plan</th></tr></thead>
+            <tbody></tbody>
+          </table></div>
+          <div class="msg" id="adminMsg"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let token = localStorage.getItem('voxdoc_token') || '';
+let me = null;
+let selectedFile = null;
+let pollTimer = null;
+let authTab = 'login';
+
+// ---------- API wrapper ----------
+async function api(path, opts = {}) {
+  opts.headers = Object.assign({}, opts.headers,
+    token ? { 'Authorization': 'Bearer ' + token } : {});
+  const res = await fetch(path, opts);
+  if (res.status === 401 && me) { showAuth(); throw new Error('Session expired — please log in again.'); }
+  let data = null;
+  try { data = await res.json(); } catch (e) { /* file/empty responses */ }
+  if (!res.ok) throw new Error((data && data.detail) || ('HTTP ' + res.status));
+  return data;
+}
+
+function show(el, msg, ok = false) {
+  el.textContent = msg;
+  el.classList.remove('err', 'ok');
+  el.classList.add(ok ? 'ok' : 'err');
+  el.style.display = msg ? 'block' : 'none';
+}
+
+// ---------- Auth ----------
+function setAuthTab(tab) {
+  authTab = tab;
+  $('tabLogin').classList.toggle('active', tab === 'login');
+  $('tabSignup').classList.toggle('active', tab === 'signup');
+  $('signupName').classList.toggle('hidden', tab === 'login');
+  $('authBtn').textContent = tab === 'login' ? 'Log In' : 'Create Free Account';
+  show($('authMsg'), '');
+}
+
+async function submitAuth() {
+  const email = $('authEmail').value.trim();
+  const password = $('authPass').value;
+  const body = authTab === 'login'
+    ? { email, password }
+    : { email, password, full_name: $('authName').value.trim() };
+  $('authBtn').disabled = true;
+  try {
+    const data = await api('/api/v1/auth/' + (authTab === 'login' ? 'login' : 'signup'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    token = data.token;
+    localStorage.setItem('voxdoc_token', token);
+    me = data.user;
+    showApp();
+  } catch (err) {
+    show($('authMsg'), err.message);
+  } finally {
+    $('authBtn').disabled = false;
+  }
+}
+
+async function logout() {
+  try { await api('/api/v1/auth/logout', { method: 'POST' }); } catch (e) {}
+  token = ''; me = null;
+  localStorage.removeItem('voxdoc_token');
+  showAuth();
+}
+
+function showAuth() {
+  clearInterval(pollTimer);
+  $('appView').classList.add('hidden');
+  $('authView').classList.remove('hidden');
+}
+
+function showApp() {
+  $('authView').classList.add('hidden');
+  $('appView').classList.remove('hidden');
+  renderAccount();
+  refreshJobs();
+  clearInterval(pollTimer);
+  pollTimer = setInterval(refreshJobs, 3000);
+  if (me.is_admin) { $('adminCard').classList.remove('hidden'); refreshAdmin(); }
+  else $('adminCard').classList.add('hidden');
+}
+
+// ---------- Account / quota ----------
+function renderAccount() {
+  $('userEmail').textContent = me.email;
+  const q = me.quota;
+  $('userTier').textContent = q.tier_name;
+  $('quotaText').innerHTML =
+    `<b>${q.tier_name}</b> — ${q.minutes_remaining} of ${q.monthly_minutes} minutes left this month`;
+  const pct = Math.min(100, 100 * q.minutes_used / q.monthly_minutes);
+  const meter = $('quotaMeter');
+  meter.firstElementChild.style.width = pct + '%';
+  meter.classList.toggle('hot', pct > 85);
+  let sub = `Uploads up to ${q.max_upload_mb >= 1024 ? (q.max_upload_mb / 1024) + ' GB' : q.max_upload_mb + ' MB'} · ${q.concurrent_jobs} concurrent job(s)`;
+  if (q.tier_expires_at) {
+    sub += ` · plan renews/expires ${new Date(q.tier_expires_at * 1000).toLocaleDateString()}`;
+  }
+  $('quotaSub').textContent = sub;
+}
+
+async function reloadMe() {
+  me = await api('/api/v1/account');
+  renderAccount();
+}
+
+async function redeemKey() {
+  show($('licenseMsg'), '');
+  try {
+    const data = await api('/api/v1/license/redeem', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: $('licenseKey').value }),
+    });
+    me = data.user;
+    renderAccount();
+    $('licenseKey').value = '';
+    show($('licenseMsg'), `🎉 Upgraded to ${me.quota.tier_name} for ${data.duration_days} days!`, true);
+  } catch (err) {
+    show($('licenseMsg'), err.message);
+  }
+}
+
+// ---------- Upload / jobs ----------
+const dz = $('dropzone');
+dz.onclick = () => $('fileInput').click();
+dz.ondragover = e => { e.preventDefault(); dz.classList.add('dragover'); };
+dz.ondragleave = () => dz.classList.remove('dragover');
+dz.ondrop = e => {
+  e.preventDefault(); dz.classList.remove('dragover');
+  if (e.dataTransfer.files.length) setFile(e.dataTransfer.files[0]);
+};
+$('fileInput').onchange = e => { if (e.target.files.length) setFile(e.target.files[0]); };
+
+function setFile(f) {
+  selectedFile = f;
+  $('fileLabel').textContent = `✅ ${f.name} (${(f.size / 1048576).toFixed(1)} MB)`;
+  $('submitBtn').disabled = false;
+}
+
+function engineChanged() {
+  const isSarvam = $('engine').value === 'sarvam';
+  $('sarvamOpts').classList.toggle('hidden', !isSarvam);
+  $('whisperOpts').classList.toggle('hidden', isSarvam);
+}
+
+async function submitJob() {
+  if (!selectedFile) return;
+  const btn = $('submitBtn');
+  btn.disabled = true; btn.textContent = '⏫ Uploading...';
+  show($('jobMsg'), '');
+
+  const fd = new FormData();
+  fd.append('file', selectedFile);
+  fd.append('engine', $('engine').value);
+  fd.append('language_code', $('language').value);
+  fd.append('sarvam_model', $('sarvamModel').value);
+  fd.append('whisper_model', $('whisperModel').value);
+  fd.append('font_name', $('fontName').value);
+  fd.append('sentences_per_paragraph', $('paraSentences').value);
+  if ($('apiKey').value.trim()) fd.append('api_key', $('apiKey').value.trim());
+
+  try {
+    await api('/api/v1/transcribe', { method: 'POST', body: fd });
+    selectedFile = null;
+    $('fileLabel').textContent = '';
+    $('fileInput').value = '';
+    refreshJobs();
+  } catch (err) {
+    show($('jobMsg'), '❌ ' + err.message);
+  } finally {
+    btn.textContent = '🚀 Generate Word Document';
+    btn.disabled = !selectedFile;
+  }
+}
+
+function fmtDuration(sec) {
+  if (!sec) return '';
+  return ` · ${Math.floor(sec / 60)}m ${Math.round(sec % 60)}s audio`;
+}
+
+function jobCard(j) {
+  const canDelete = j.status !== 'processing';
+  return `<div class="job">
+    <div class="job-head">
+      <span class="job-name">${j.filename}</span>
+      <span class="badge ${j.status}">${j.status.toUpperCase()}</span>
+    </div>
+    <div class="bar"><div style="width:${j.progress}%"></div></div>
+    <div class="detail">${j.detail || ''}${fmtDuration(j.duration_sec)}${j.words ? ` · ${j.words.toLocaleString()} words` : ''}</div>
+    <div class="job-actions">
+      ${j.status === 'completed' ? `<button onclick="downloadJob('${j.id}', this)">📥 Download .docx</button>` : ''}
+      ${canDelete ? `<button class="ghost" onclick="deleteJob('${j.id}')">🗑 Delete</button>` : ''}
+    </div>
+  </div>`;
+}
+
+let hadActive = false;
+async function refreshJobs() {
+  try {
+    const data = await api('/api/v1/jobs');
+    const list = $('jobList');
+    list.innerHTML = data.jobs.length
+      ? data.jobs.map(jobCard).join('')
+      : '<div class="empty">No jobs yet — upload a recording to get started.</div>';
+    const active = data.jobs.some(j => j.status === 'queued' || j.status === 'processing');
+    if (hadActive && !active) reloadMe();   // job finished -> refresh quota meter
+    hadActive = active;
+  } catch (e) { /* transient; retry on next tick */ }
+}
+
+async function downloadJob(id, btn) {
+  btn.disabled = true;
+  try {
+    const res = await fetch(`/api/v1/jobs/${id}/download`,
+      { headers: { 'Authorization': 'Bearer ' + token } });
+    if (!res.ok) throw new Error('Download failed (' + res.status + ')');
+    const blob = await res.blob();
+    const cd = res.headers.get('Content-Disposition') || '';
+    const m = cd.match(/filename\*?=(?:UTF-8''|")?([^";]+)/i);
+    const name = m ? decodeURIComponent(m[1].replace(/"/g, '')) : 'transcript.docx';
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name; a.click();
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    show($('jobMsg'), '❌ ' + err.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function deleteJob(id) {
+  try { await api('/api/v1/jobs/' + id, { method: 'DELETE' }); refreshJobs(); }
+  catch (err) { show($('jobMsg'), '❌ ' + err.message); }
+}
+
+// ---------- Admin ----------
+async function refreshAdmin() {
+  try {
+    const data = await api('/api/v1/admin/users');
+    const tbody = $('usersTable').querySelector('tbody');
+    tbody.innerHTML = data.users.map(u => `<tr>
+      <td>${u.email}${u.is_admin ? ' 🛡️' : ''}</td>
+      <td>${u.quota.tier}</td>
+      <td>${u.quota.minutes_used}m</td>
+      <td>
+        <select onchange="setTier('${u.id}', this.value)">
+          <option value="">change…</option>
+          <option value="free">free</option>
+          <option value="pro">pro (30d)</option>
+          <option value="agency">agency (30d)</option>
+        </select>
+      </td>
+    </tr>`).join('');
+  } catch (e) { show($('adminMsg'), e.message); }
+}
+
+async function setTier(userId, tier) {
+  if (!tier) return;
+  try {
+    await api(`/api/v1/admin/users/${userId}/tier`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tier, days: tier === 'free' ? 0 : 30 }),
+    });
+    show($('adminMsg'), 'Plan updated.', true);
+    refreshAdmin();
+    reloadMe();
+  } catch (e) { show($('adminMsg'), e.message); }
+}
+
+async function genKeys() {
+  try {
+    const data = await api('/api/v1/admin/license-keys', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tier: $('keyTier').value,
+        days: parseInt($('keyDays').value) || 30,
+        count: parseInt($('keyCount').value) || 1,
+      }),
+    });
+    $('newKeys').innerHTML = data.keys.map(k => `<code class="key">${k}</code>`).join(' ');
+    show($('adminMsg'), `Minted ${data.keys.length} key(s) — copy & sell them.`, true);
+  } catch (e) { show($('adminMsg'), e.message); }
+}
+
+// ---------- Boot ----------
+(async function boot() {
+  if (token) {
+    try { me = await api('/api/v1/account'); showApp(); return; }
+    catch (e) { token = ''; localStorage.removeItem('voxdoc_token'); }
+  }
+  showAuth();
+})();
+</script>
+</body>
+</html>

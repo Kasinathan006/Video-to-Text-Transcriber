@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VoxDoc AI — Turn Any Recording into a Polished Word Document</title>
+<meta name="description" content="AI transcription studio for Indian languages & English. Videos, lectures and podcasts become beautifully formatted Word documents in minutes.">
+<style>
+  :root {
+    --bg: #0B0F19; --text: #E2E8F0; --muted: #94A3B8;
+    --indigo: #6366F1; --violet: #8B5CF6; --green: #10B981;
+    --glass: rgba(255,255,255,0.03); --border: rgba(255,255,255,0.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
+    background: radial-gradient(1200px 800px at 50% -10%, #1e1b4b, var(--bg) 60%);
+    color: var(--text); line-height: 1.6;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 1.2rem; }
+  nav { display: flex; justify-content: space-between; align-items: center; padding: 1.4rem 0; }
+  .logo { font-weight: 800; font-size: 1.3rem;
+    background: linear-gradient(90deg, #818cf8, #c084fc);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .btn {
+    display: inline-block; padding: .7rem 1.6rem; border-radius: 10px; font-weight: 700;
+    text-decoration: none; color: white; border: none; cursor: pointer; font-size: 1rem;
+    background: linear-gradient(135deg, var(--indigo), var(--violet));
+    transition: transform .15s, box-shadow .15s;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(99,102,241,.45); }
+  .btn.ghost { background: transparent; border: 1px solid var(--border); font-weight: 600; }
+  .hero { text-align: center; padding: 5rem 0 3.5rem; }
+  .hero h1 {
+    font-size: clamp(2.2rem, 5.5vw, 3.6rem); font-weight: 800; line-height: 1.15;
+    background: linear-gradient(90deg, #818cf8, #c084fc, #f472b6);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 1.1rem;
+  }
+  .hero p { font-size: 1.15rem; color: var(--muted); max-width: 680px; margin: 0 auto 2rem; }
+  .hero .cta-row { display: flex; gap: .9rem; justify-content: center; flex-wrap: wrap; }
+  .badges { display: flex; gap: 1.6rem; justify-content: center; flex-wrap: wrap;
+            margin-top: 2.4rem; color: var(--muted); font-size: .88rem; }
+  section { padding: 3.5rem 0; }
+  h2 { text-align: center; font-size: 1.9rem; font-weight: 800; margin-bottom: 2.2rem; }
+  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.2rem; }
+  .card {
+    background: var(--glass); border: 1px solid var(--border); border-radius: 16px;
+    padding: 1.6rem; backdrop-filter: blur(12px);
+  }
+  .card .icon { font-size: 1.8rem; margin-bottom: .6rem; display: block; }
+  .card h3 { font-size: 1.05rem; margin-bottom: .45rem; }
+  .card p { color: var(--muted); font-size: .92rem; }
+  .pricing { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.2rem; }
+  .plan { position: relative; text-align: center; }
+  .plan.popular { border-color: var(--violet); box-shadow: 0 0 34px rgba(139,92,246,.22); }
+  .plan .tag {
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--indigo), var(--violet));
+    font-size: .7rem; font-weight: 700; padding: .25rem .8rem; border-radius: 99px;
+  }
+  .plan .price { font-size: 2.3rem; font-weight: 800; margin: .6rem 0 .1rem; }
+  .plan .per { color: var(--muted); font-size: .85rem; margin-bottom: 1.1rem; }
+  .plan ul { list-style: none; text-align: left; margin: 0 0 1.4rem; }
+  .plan li { padding: .32rem 0; color: var(--muted); font-size: .92rem; }
+  .plan li::before { content: "✓  "; color: var(--green); font-weight: 700; }
+  footer { border-top: 1px solid var(--border); padding: 2rem 0; text-align: center;
+           color: var(--muted); font-size: .85rem; }
+  footer a { color: #a3b3f5; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="container">
+  <nav>
+    <div class="logo">🎙️ VoxDoc AI</div>
+    <div>
+      <a class="btn ghost" href="/docs" style="margin-right:.6rem">API Docs</a>
+      <a class="btn" href="/app">Open the Studio →</a>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <h1>Turn Any Recording into a<br>Polished Word Document</h1>
+    <p>Upload lectures, courses, podcasts or meetings — VoxDoc AI transcribes them with
+       state-of-the-art accuracy in Tamil, Hindi, Tanglish, Telugu, Malayalam, Kannada &amp; English,
+       and delivers beautifully formatted <b>.docx</b> reports in minutes.</p>
+    <div class="cta-row">
+      <a class="btn" href="/app">🚀 Start Free — 60 min/month</a>
+      <a class="btn ghost" href="#pricing">See Pricing</a>
+    </div>
+    <div class="badges">
+      <span>⚡ Handles 10GB+ recordings</span>
+      <span>🇮🇳 8 Indian languages</span>
+      <span>🔒 Offline privacy mode</span>
+      <span>📄 Word-ready formatting</span>
+    </div>
+  </div>
+
+  <section>
+    <h2>Why creators &amp; teams choose VoxDoc</h2>
+    <div class="features">
+      <div class="card"><span class="icon">⚡</span><h3>Resilient Media Engine</h3>
+        <p>Hardened FFmpeg pipeline streams huge files from disk — survives corrupted MP4 streams
+           and never runs out of RAM, even on multi-hour 10GB recordings.</p></div>
+      <div class="card"><span class="icon">🇮🇳</span><h3>Indian-Language Mastery</h3>
+        <p>Sarvam AI batch transcription tuned for Indian accents and code-switching like Tanglish —
+           accuracy that generic tools can't match.</p></div>
+      <div class="card"><span class="icon">🔒</span><h3>Private, Offline Mode</h3>
+        <p>Switch to local Faster-Whisper and audio never leaves the machine — ideal for legal,
+           medical and confidential recordings.</p></div>
+      <div class="card"><span class="icon">📄</span><h3>Word-Perfect Documents</h3>
+        <p>Executive summary header, clean paragraphing, per-part word counts, and Unicode font
+           protection so Indic scripts render crisply.</p></div>
+      <div class="card"><span class="icon">🧵</span><h3>Background Job Queue</h3>
+        <p>Upload and walk away — jobs process in the background with live progress and survive
+           restarts. Download whenever you're ready.</p></div>
+      <div class="card"><span class="icon">🔑</span><h3>Simple Licensing</h3>
+        <p>Upgrade instantly with a license key — no credit card forms. Perfect for teams and
+           invoice-based purchasing.</p></div>
+    </div>
+  </section>
+
+  <section id="pricing">
+    <h2>Simple, honest pricing</h2>
+    <div class="pricing">
+      <div class="card plan">
+        <h3>Starter</h3>
+        <div class="price">$0</div><div class="per">forever free</div>
+        <ul>
+          <li>60 transcription minutes / month</li>
+          <li>Uploads up to 500 MB</li>
+          <li>Sarvam AI &amp; local Whisper engines</li>
+          <li>Formatted .docx export</li>
+        </ul>
+        <a class="btn ghost" href="/app">Start Free</a>
+      </div>
+      <div class="card plan popular">
+        <div class="tag">MOST POPULAR</div>
+        <h3>Creator Pro</h3>
+        <div class="price">$19</div><div class="per">per month</div>
+        <ul>
+          <li>900 minutes (15 hours) / month</li>
+          <li>Uploads up to 10 GB</li>
+          <li>2 concurrent jobs, priority queue</li>
+          <li>Custom fonts &amp; document styling</li>
+        </ul>
+        <a class="btn" href="/app">Get Creator Pro</a>
+      </div>
+      <div class="card plan">
+        <h3>Agency / Team</h3>
+        <div class="price">$49</div><div class="per">per month</div>
+        <ul>
+          <li>3,000 minutes (50 hours) / month</li>
+          <li>Uploads up to 50 GB</li>
+          <li>4 concurrent jobs, batch processing</li>
+          <li>Full REST API access</li>
+        </ul>
+        <a class="btn ghost" href="/app">Contact / Upgrade</a>
+      </div>
+    </div>
+    <p style="text-align:center; color:var(--muted); font-size:.85rem; margin-top:1.4rem">
+      Paid plans are activated instantly with a license key — purchase one and redeem it on your
+      Account page. Volume &amp; educational discounts available.
+    </p>
+  </section>
+
+  <footer>
+    🎙️ VoxDoc AI — AI Media-to-Document Studio · <a href="/app">Open App</a> ·
+    <a href="/docs">API Documentation</a> · <a href="/api/v1/health">Status</a>
+  </footer>
+</div>
+</body>
+</html>
