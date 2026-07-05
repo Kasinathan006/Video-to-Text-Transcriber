@@ -193,12 +193,16 @@ def verify_api_key(engine: str, key: str) -> tuple[bool, str]:
 def download_from_gdrive(link: str, dest_dir: Path):
     """Download a Google Drive file/folder link (or direct URL). Returns media paths."""
     import gdown
+    import inspect
 
     dest_dir.mkdir(parents=True, exist_ok=True)
     if "/folders/" in link:
         paths = gdown.download_folder(url=link, output=str(dest_dir), quiet=True) or []
     else:
-        out = gdown.download(url=link, output=str(dest_dir) + os.sep, quiet=True, fuzzy=True)
+        dl_kwargs = {"url": link, "output": str(dest_dir) + os.sep, "quiet": True}
+        if "fuzzy" in inspect.signature(gdown.download).parameters:
+            dl_kwargs["fuzzy"] = True
+        out = gdown.download(**dl_kwargs)
         paths = [out] if out else []
 
     media = [p for p in paths if p and Path(p).suffix.lower() in MEDIA_EXTENSIONS]
