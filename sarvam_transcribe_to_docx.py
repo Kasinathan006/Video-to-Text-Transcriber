@@ -262,7 +262,7 @@ def create_transcription_docx(json_files, output_docx_path, source_name, duratio
 def main():
     parser = argparse.ArgumentParser(description="End-to-End Video/Audio Transcription to Word Docx via Sarvam AI")
     parser.add_argument("input_file", help="Path to input video or audio file (.mp4, .wav, etc.)")
-    parser.add_argument("--api-key", default=os.getenv("SARVAM_API_KEY", "sk_wr8d4l5a_12mFHFwSSO5ovT7v49N2d2rl"),
+    parser.add_argument("--api-key", default=os.getenv("SARVAM_API_KEY", ""),
                         help="Sarvam AI API Key")
     parser.add_argument("--output", "-o", default=None, help="Output .docx path")
     parser.add_argument("--work-dir", default="audio_chunks", help="Temporary folder for audio segmentation")
@@ -271,6 +271,10 @@ def main():
 
     if not os.path.exists(args.input_file):
         print(f"Error: Input file '{args.input_file}' not found.")
+        sys.exit(1)
+
+    if not args.api_key.strip():
+        print("Error: Sarvam AI API key is required. Please provide --api-key or set SARVAM_API_KEY environment variable.")
         sys.exit(1)
 
     out_docx = args.output

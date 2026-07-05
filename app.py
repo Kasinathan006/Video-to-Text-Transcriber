@@ -20,6 +20,7 @@ import time
 import uuid
 from pathlib import Path
 
+import requests
 import streamlit as st
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
@@ -161,6 +162,28 @@ def check_password():
             st.info("💡 **Note for Admin:** Default passcode is `mohan` if not configured. To customize, set `VOXDOC_ADMIN_PASSWORD` in your cloud `.env` or Streamlit Secrets.")
             
     return False
+
+
+@st.cache_data(show_spinner=False, ttl=300)
+def verify_api_key(engine: str, key: str) -> tuple[bool, str]:
+    """Verify if the provided API key is valid by testing against cloud API endpoints."""
+    if not key or not key.strip():
+        return False, "API Key is empty."
+    key = key.strip()
+    try:
+        if engine == "sarvam":
+            r = requests.post("https://api.sarvam.ai/speech-to-text", headers={"api-subscription-key": key}, timeout=10)
+            if r.status_code in (401, 403):
+                return False, "Invalid Sarvam AI API Key. Please check your credentials."
+            return True, "Valid Sarvam AI API Key!"
+        elif engine == "groq":
+            r = requests.get("https://api.groq.com/openai/v1/models", headers={"Authorization": f"Bearer {key}"}, timeout=10)
+            if r.status_code == 200:
+                return True, "Valid Groq API Key!"
+            return False, "Invalid Groq API Key. Please check your credentials."
+        return True, "Valid."
+    except Exception as e:
+        return False, f"Verification failed: {e}"
 
 
 # ----------------------------------------------------------------------------
@@ -496,12 +519,25 @@ def main():
         sarvam_model = "saaras:v3"
         whisper_model = "large-v3"
         diarization = False
+        api_key_valid = True
 
         if engine_key == "sarvam":
             api_key = st.text_input(
                 "Sarvam API Key", value=api_key, type="password",
                 help="Get a key at dashboard.sarvam.ai — or set SARVAM_API_KEY in secrets.",
             )
+            if api_key.strip():
+                is_valid, msg = verify_api_key("sarvam", api_key)
+                if is_valid:
+                    st.success("✅ **Verified & Valid!** Ready to transcribe.")
+                    api_key_valid = True
+                else:
+                    st.error(f"❌ **Invalid Key!** {msg}")
+                    api_key_valid = False
+            else:
+                st.caption("⚠️ Please enter a Sarvam API Key to continue.")
+                api_key_valid = False
+
             language_code = LANGUAGE_OPTIONS[st.selectbox("Audio Language", list(LANGUAGE_OPTIONS))]
             sarvam_model = SARVAM_MODELS[st.selectbox("Sarvam Model", list(SARVAM_MODELS))]
             diarization = st.toggle(
@@ -514,12 +550,25 @@ def main():
                 "Groq API Key (100% Free)", value=groq_api_key, type="password",
                 help="Get a free key instantly at console.groq.com — or set GROQ_API_KEY in secrets.",
             )
+            if groq_api_key.strip():
+                is_valid, msg = verify_api_key("groq", groq_api_key)
+                if is_valid:
+                    st.success("✅ **Verified & Valid!** Ready to transcribe.")
+                    api_key_valid = True
+                else:
+                    st.error(f"❌ **Invalid Key!** {msg}")
+                    api_key_valid = False
+            else:
+                st.caption("⚠️ Please enter a Groq API Key to continue.")
+                api_key_valid = False
+
             st.info("⚡ Groq provides 100% FREE ultra-fast cloud transcription using Whisper-Large-V3. No GPU required on hosting server!")
         else:
             whisper_model = st.selectbox(
                 "Whisper Model Size", ["large-v3", "medium", "small", "base", "tiny"], index=0,
                 help="large-v3 = best accuracy. Uses your GPU when CUDA is available.",
             )
+            api_key_valid = True
 
         chunk_minutes = st.slider(
             "Audio Chunk Size (Minutes)", 15, 45, 40,
@@ -540,6 +589,7 @@ def main():
         "engine": engine_key,
         "api_key": api_key,
         "groq_api_key": groq_api_key,
+        "api_key_valid": api_key_valid,
         "language_code": language_code,
         "sarvam_model": sarvam_model,
         "whisper_model": whisper_model,
@@ -572,8 +622,12 @@ def main():
         if cfg["engine"] == "sarvam" and not cfg["api_key"].strip():
             st.error("⚠️ Please enter your Sarvam AI API key in the sidebar "
                      "(or switch to the free Groq or Local Faster-Whisper engine).")
+        elif cfg["engine"] == "sarvam" and not cfg.get("api_key_valid", False):
+            st.error("❌ Your Sarvam AI API key is invalid! Please verify and enter a valid API key in the sidebar.")
         elif cfg["engine"] == "groq" and not cfg["groq_api_key"].strip():
             st.error("⚠️ Please enter your Groq API key in the sidebar (get a 100% free key at console.groq.com!).")
+        elif cfg["engine"] == "groq" and not cfg.get("api_key_valid", False):
+            st.error("❌ Your Groq API key is invalid! Please verify and enter a valid API key in the sidebar.")
         elif uploaded_file is None and not gdrive_link.strip():
             st.warning("⚠️ Please upload a media file or paste a Google Drive link first!")
         else:

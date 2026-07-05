@@ -306,7 +306,11 @@ def create_transcription_docx(json_files, output_docx_path, source_name, duratio
 
 
 def main():
-    api_key = os.getenv("SARVAM_API_KEY", "sk_wr8d4l5a_12mFHFwSSO5ovT7v49N2d2rl")
+    api_key = os.getenv("SARVAM_API_KEY", "")
+    if not api_key.strip():
+        log("[ERROR] SARVAM_API_KEY environment variable is required! Please set it before running.")
+        return
+
     gdrive_url = "https://drive.google.com/drive/folders/1lEqhcp7B2mGoPSNPmdoFk4IGDs-F-JT9?usp=sharing"
     download_dir = "gdrive_videos"
 
